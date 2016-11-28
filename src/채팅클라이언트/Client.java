@@ -30,6 +30,14 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 
+/*
+ * modified Author : Jeon Jong-Chan
+ * Date : 2016-11-27 ~
+ * 문제점 & 수정
+ * 1. 채팅방 나가기가 안된다.
+ * 2. 서버종료해도 서버와는 통신을 한다.
+ * 3. 암호화 구현이 안되있다.
+ */
 public class Client extends JFrame implements ActionListener,KeyListener {
 // 자동 재정의 ctrl+shift+o
 	
@@ -90,7 +98,11 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private OutputStream os;
    private DataInputStream dis;
    private DataOutputStream dos;
-  
+   // 11-28 JC 추가 : xor 랜덤 수를 저장
+   // 11-28 JC 추가 : 암호화된 문자 저장
+   private String xor; 
+   private String encryption;
+   private String decryption;
    //그외 변수들
    Vector user_list = new Vector();
    Vector room_list = new Vector();
@@ -341,6 +353,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	
 	   String protocol = st.nextToken();
 	   String Message = st.nextToken();
+	   System.out.println(" debug 1 ");
 	   
 	   System.out.println("프로토콜 :" +protocol);
 	   System.out.println("내용 :"+Message);
@@ -369,6 +382,17 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 
 	   else if(protocol.equals("CreateRoom")) // 방을 만들었을때
 	   {
+		   // 11-28 JC 추가 : xor 암호화를 위한 키 값을 받아온다.
+		   try {
+			   
+			   xor = dis.readUTF();
+			   System.out.println(xor);
+		   }
+		   catch (IOException e) 
+		   {
+			   // TODO 자동 생성된 catch 블록
+			   e.printStackTrace();
+		   }
 		   My_Room = Message;
 		   message_tf.setEnabled(true);
 		   send_btn.setEnabled(true);
@@ -388,9 +412,21 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   }
 	   else if(protocol.equals("Chatting"))
 	   {
+		   System.out.println(" debug 2 ");
 		   String msg = st.nextToken();
-		   
+		   System.out.println(" debug 4 :"+ msg);
+		   decryption = new String(xor(msg.getBytes()));
+		   Chat_area.append(Message+" : "+decryption+"\n");
+		   System.out.println(" debug 3 ");
+		   scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+	   }
+	   else if(protocol.equals("Notice"))
+	   {
+		   System.out.println(" debug 2 ");
+		   String msg = st.nextToken();
+		   System.out.println(" debug 4 :"+ msg);
 		   Chat_area.append(Message+" : "+msg+"\n");
+		   System.out.println(" debug 3 ");
 		   scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
 	   }
 	   else if(protocol.equals("OldRoom"))
@@ -400,6 +436,17 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   }
 	   else if(protocol.equals("JoinRoom"))
 	   {
+		   
+		   try 
+		   {
+			  //방에 참가시 해당 방에 키값을 받아온다.
+			   xor = dis.readUTF();
+		   } 
+		   catch (IOException e)
+		   {
+			   // TODO 자동 생성된 catch 블록
+			   e.printStackTrace();
+		   }
 		   My_Room = Message;
 		   message_tf.setEnabled(true);
 		   send_btn.setEnabled(true);
@@ -443,6 +490,25 @@ public class Client extends JFrame implements ActionListener,KeyListener {
         
    }
    
+   /* 11-28 JC 추가
+    * 바이트로 전환된 문자열과 서버에게 전달받은 키값을 바이트로 바꾼 값과 xor 연산
+    */
+   public byte[] xor( byte[] data)
+   {
+	   byte []key = xor.getBytes();
+	   
+	   final int orgLength = data.length;  
+	   final int keyLength = key.length; 
+	   //XOR 연산
+	   final byte[] converted = new byte[orgLength];  
+	   for ( int i = 0 , j = 0 ; i < orgLength ; i++ , j++ )  
+	   {  
+	    converted[ i ] = ( byte ) ( data[ i ] ^ key[ j ] );  
+	    j = (j < keyLength - 1 ? j : 0); //j의 값이 pwd문자열의 길이보다 커질경우 0부터 시작 아닐경우는 j의 값을 갖는다.
+	   }
+	  
+	   return converted ; //byte배열인 code를 String으로 변환하여 반환한다.
+   	}
    
    public static void main(String[] args) {
    
@@ -529,7 +595,14 @@ public class Client extends JFrame implements ActionListener,KeyListener {
   		}
   		else if(!(message_tf.getText() == null))
   		{
-  			send_message("Chatting/"+My_Room+"/"+message_tf.getText());
+  			/* 11-28 JC 추가
+  			 *입력받은 메세지를 바이트로 전환하여 xor 함수에 전달 후 반환값은 다시 string 값으로 전환.
+  			 *trim 함수를 통해 앞뒤공백을 제거해 오류가 나는 것을 막는다.
+  			 */
+  			System.out.println("debug input message : "+ message_tf.getText().trim());
+  			encryption = new String(xor(message_tf.getText().trim().getBytes()));
+  			System.out.println("debug encryption message : " + encryption);
+  			send_message("Chatting/"+My_Room+"/"+encryption);
   			message_tf.setText(" ");
   	   	 	message_tf.requestFocus();
   		}
@@ -567,7 +640,10 @@ public void keyReleased(KeyEvent e) { // 눌렀다땠을 때
 		}
 		else if(!(message_tf.getText() == null))
 		{
-			send_message("Chatting/"+My_Room+"/"+message_tf.getText());
+  			encryption = new String(xor(message_tf.getText().trim().getBytes()));
+  			System.out.println("debug encryption message : " + encryption);
+  			send_message("Chatting/"+My_Room+"/"+encryption);
+			//send_message("Chatting/"+My_Room+"/"+message_tf.getText());
 			message_tf.setText(" "); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
 	   	 	message_tf.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
 		}
