@@ -29,6 +29,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+import javax.swing.JRadioButton;
+import javax.swing.UIManager;
+import java.awt.Font;
 
 public class Client extends JFrame implements ActionListener,KeyListener {
 // 자동 재정의 ctrl+shift+o
@@ -52,29 +56,36 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    
    
    //Main GUI 변수
-   final ImageIcon main_img = new ImageIcon("C:\\chat\\main_sheet.jpg");
-   final ImageIcon chat_img = new ImageIcon("C:\\chat\\mainchat_sheet.jpg");
+   ImageIcon main_img = new ImageIcon("C:\\chat\\main_sheet.jpg"); // 채팅창 배경 불러오기
+   final ImageIcon chat_img = new ImageIcon("C:\\chat\\mainchat_sheet.jpg"); // 채팅 영역 배경 불러오기
+  
    private JPanel contentPane = new JPanel(){
 	   public void paintComponent(Graphics g){
-			  g.drawImage(main_img.getImage(), 0, 0, null);
+			  g.drawImage(main_img.getImage(), 0, 0, null); // 채팅창 영역 사진 출력
 			  setOpaque(false);
 			  super.paintComponent(g);
 		  };
    };
+   
    private JTextField message_tf;
    private JButton notesend_btn = new JButton("쪽지보내기");
    private JButton joinroom_btn = new JButton("채팅방참여");
    private JButton createroom_btn = new JButton("방만들기");
    private JButton send_btn = new JButton("전송");
    private JButton exit_btn = new JButton("나가기");
-   
+   //======================= 배경화면 버튼 생성 ===============
+   private JButton backgnd1_btn = new JButton("3");
+   private JButton backgnd2_btn = new JButton("2");
+   private JButton backgnd3_btn = new JButton("1");
+   //=======================================================
+
    private JList User_list = new JList();
    private JList Room_list = new JList();
    
    private JTextArea Chat_area = new JTextArea();
-   JScrollPane scrollPane = new JScrollPane(Chat_area){
+   JScrollPane scrollPane = new JScrollPane(){
    public void paintComponent(Graphics g){
-	  g.drawImage(chat_img.getImage(), 0, 0, null);
+	  g.drawImage(chat_img.getImage(), 0, 0, null); // 채팅 영역 사진 출력
 	  setOpaque(false);
 	  super.paintComponent(g);
    }  
@@ -111,11 +122,28 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private void start()
    {
       login_btn.addActionListener(this);
+      notesend_btn.setFont(new Font("HY돋움", Font.PLAIN, 10));
+      notesend_btn.setBackground(Color.WHITE);
       notesend_btn.addActionListener(this);
+      joinroom_btn.setFont(new Font("HY돋움", Font.PLAIN, 10));
+      joinroom_btn.setBackground(Color.WHITE);
       joinroom_btn.addActionListener(this);
+      createroom_btn.setFont(new Font("HY돋움", Font.PLAIN, 10));
+      createroom_btn.setBackground(Color.WHITE);
       createroom_btn.addActionListener(this);
       send_btn.addActionListener(this);
       exit_btn.addActionListener(this);
+      backgnd1_btn.setFont(new Font("HY돋움", Font.PLAIN, 10));
+      backgnd1_btn.setBackground(Color.WHITE);
+      //================ 배경 이미지 버튼 눌림 확인=================
+      backgnd1_btn.addActionListener(this);
+      backgnd2_btn.setFont(new Font("HY돋움", Font.PLAIN, 10));
+      backgnd2_btn.setBackground(Color.WHITE);
+      backgnd2_btn.addActionListener(this);
+      backgnd3_btn.setFont(new Font("HY돋움", Font.PLAIN, 10));
+      backgnd3_btn.setBackground(Color.WHITE);
+      backgnd3_btn.addActionListener(this);
+      //=======================================================
     
       message_tf.addKeyListener(this);
    }
@@ -123,72 +151,82 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private void Main_init()
    {
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      setBounds(100, 100, 580, 455);
+      setBounds(100, 100, 1462, 926);
       setResizable(false);
+      contentPane.setBackground(Color.WHITE);
      
       contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
       setContentPane(contentPane);
       contentPane.setLayout(null);
       
       JLabel lbNewlabel = new JLabel("전 체 접 속 자");
-      lbNewlabel.setBounds(12, 10, 86, 15);
+      lbNewlabel.setFont(new Font("HY돋움", Font.PLAIN, 12));
+      lbNewlabel.setBounds(124, 37, 86, 15);
       contentPane.add(lbNewlabel);
       
-      JScrollPane scrollPane_2 = new JScrollPane();
-      scrollPane_2.setBounds(12, 32, 109, 117);
-      contentPane.add(scrollPane_2);
       
-      scrollPane_2.setViewportView(User_list);
-      
-      
-      notesend_btn.setBounds(12, 159, 109, 23);
+      notesend_btn.setBounds(113, 124, 109, 23);
       contentPane.add(notesend_btn);
       
       JLabel lblNewLabel_1 = new JLabel("채팅방목록");
-      lblNewLabel_1.setBounds(12, 192, 97, 15);
+      lblNewLabel_1.setFont(new Font("HY돋움", Font.PLAIN, 12));
+      lblNewLabel_1.setBounds(388, 37, 97, 15);
       contentPane.add(lblNewLabel_1);
-      
-      JScrollPane scrollPane_1 = new JScrollPane();
-      scrollPane_1.setBounds(12, 213, 109, 135);
-      contentPane.add(scrollPane_1);
-      
-      scrollPane_1.setViewportView(Room_list);
     
    
-      joinroom_btn.setBounds(12, 386, 109, 23);
+      joinroom_btn.setBounds(431, 124, 109, 23);
       contentPane.add(joinroom_btn);
       
-      createroom_btn.setBounds(12, 358, 109, 23);
+      createroom_btn.setBounds(313, 124, 109, 23);
       contentPane.add(createroom_btn);
 
-      scrollPane.setBounds(133, 29, 418, 347);         
+      scrollPane.setBounds(54, 157, 1390, 699);         
       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
       contentPane.add(scrollPane);
       
-      Chat_area.setBackground(null);
-      Chat_area.setOpaque(false);
-      
-      scrollPane.setBackground(null);   
+      scrollPane.setBackground(Color.WHITE);   
       scrollPane.setOpaque(false);
       scrollPane.getViewport().setOpaque(false);
       
-      scrollPane.setViewportView(Chat_area);
-      Chat_area.setEditable(false);
-      
       
       message_tf = new JTextField();
-      message_tf.setBounds(133, 387, 279, 21);
+      message_tf.setBounds(64, 866, 1233, 21);
       contentPane.add(message_tf);
       message_tf.setColumns(10);
       message_tf.setEnabled(false);
       
-      send_btn.setBounds(414, 386, 63, 23);
+      send_btn.setBounds(1299, 865, 63, 23);
       contentPane.add(send_btn);
       send_btn.setEnabled(false);
       
-      exit_btn.setBounds(479, 386, 80, 23);
+      exit_btn.setBounds(1364, 865, 80, 23);
       contentPane.add(exit_btn);
       exit_btn.setEnabled(false);
+      
+      
+    //================= 배경 이미지 변경 버튼 위치설정, 버튼추가==========
+      backgnd1_btn.setBounds(1362, 124, 54, 23); 
+      contentPane.add(backgnd1_btn);		  
+      
+      backgnd2_btn.setBounds(1297, 124, 54, 23);
+      contentPane.add(backgnd2_btn);
+       
+      backgnd3_btn.setBounds(1229, 124, 54, 23);
+      contentPane.add(backgnd3_btn);
+      Chat_area.setBounds(54, 157, 1390, 699);
+      contentPane.add(Chat_area);
+      Chat_area.setDisabledTextColor(new Color(72, 61, 139));
+      
+      Chat_area.setBackground(Color.WHITE);
+      Chat_area.setOpaque(false);
+      Chat_area.setEditable(false);
+      User_list.setFont(new Font("HY돋움", Font.PLAIN, 12));
+      User_list.setBounds(124, 62, 86, 52);
+      contentPane.add(User_list);
+      Room_list.setFont(new Font("HY돋움", Font.PLAIN, 12));
+      Room_list.setBounds(365, 56, 109, 52);
+      contentPane.add(Room_list);
+      //==========================================================
       
       
       this.setVisible(false);
@@ -238,7 +276,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       id_tf.setColumns(10);
       
       
-      login_btn.setBounds(27, 294, 176, 23);
+      login_btn.setBounds(27, 294, 176, 23); // '입장'버튼 위치 설정
       Login_Pane.add(login_btn);
       
       Login_GUI.setVisible(true); 
@@ -484,6 +522,25 @@ public class Client extends JFrame implements ActionListener,KeyListener {
         	 Network();
          }
       }
+      
+      // ====================== 배경 이미지 변경 버튼 클릭 시 ===========================
+      else if(e.getSource()==backgnd3_btn)  
+      {
+    	  main_img=new ImageIcon("C:\\chat\\3.jpg");
+    	  contentPane.repaint();
+      }
+      else if(e.getSource()==backgnd2_btn)
+      {
+    	  main_img=new ImageIcon("C:\\chat\\2.jpg");
+    	  contentPane.repaint();
+      }
+      else if(e.getSource()==backgnd1_btn)
+      {
+    	  main_img=new ImageIcon("C:\\chat\\excel.jpg");
+    	  contentPane.repaint();
+      }
+      //================================================================
+      
       else if(e.getSource()==notesend_btn)
       {
          System.out.println("쪽지 보내기 버튼 클릭");
@@ -580,5 +637,4 @@ public void keyTyped(KeyEvent e) { // 타이핑했을 때
 	// TODO Auto-generated method stub
 	
 }
-
 }
