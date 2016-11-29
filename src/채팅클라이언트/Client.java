@@ -1,5 +1,5 @@
 
-package Ã¤ÆÃÅ¬¶óÀÌ¾ğÆ®;
+package ì±„íŒ…í´ë¼ì´ì–¸íŠ¸;
 
 
 import java.awt.Graphics;
@@ -29,11 +29,15 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+import javax.swing.JRadioButton;
+import javax.swing.UIManager;
+import java.awt.Font;
 
 public class Client extends JFrame implements ActionListener,KeyListener {
-// ÀÚµ¿ ÀçÁ¤ÀÇ ctrl+shift+o
+// ìë™ ì¬ì •ì˜ ctrl+shift+o
 	
-   //Login GUI º¯¼ö
+   //Login GUI ë³€ìˆ˜
   
    final ImageIcon logo_img = new ImageIcon("C:\\chat\\login_logo.jpg");
    private JFrame Login_GUI = new JFrame();
@@ -45,45 +49,55 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 		   super.paintComponent(g);
 	   };
    }; 
-   private JTextField ip_tf; //ip ÅØ½ºÆ®ÇÊµå
-   private JTextField port_tf; //port ÅØ½ºÆ®ÇÊµå
-   private JTextField id_tf; //id ÅØ½ºÆ®ÇÊµå
-   private JButton login_btn = new JButton("ÀÔ  Àå");
+   private JTextField ip_tf; //ip í…ìŠ¤íŠ¸í•„ë“œ
+   private JTextField port_tf; //port í…ìŠ¤íŠ¸í•„ë“œ
+   private JTextField id_tf; //id í…ìŠ¤íŠ¸í•„ë“œ
+   private JButton login_btn = new JButton("ì…  ì¥");
    
    
-   //Main GUI º¯¼ö
-   final ImageIcon main_img = new ImageIcon("C:\\chat\\main_sheet.jpg");
-   final ImageIcon chat_img = new ImageIcon("C:\\chat\\mainchat_sheet.jpg");
+   //Main GUI ë³€ìˆ˜
+   ImageIcon main_img = new ImageIcon("main_sheet.jpg"); // ì±„íŒ…ì°½ ë°°ê²½ ë¶ˆëŸ¬ì˜¤ê¸°
+   final ImageIcon chat_img = new ImageIcon("mainchat_sheet.jpg"); // ì±„íŒ… ì˜ì—­ ë°°ê²½ ë¶ˆëŸ¬ì˜¤ê¸°
+  
    private JPanel contentPane = new JPanel(){
 	   public void paintComponent(Graphics g){
-			  g.drawImage(main_img.getImage(), 0, 0, null);
+			  g.drawImage(main_img.getImage(), 0, 0, null); // ì±„íŒ…ì°½ ì˜ì—­ ì‚¬ì§„ ì¶œë ¥
 			  setOpaque(false);
 			  super.paintComponent(g);
 		  };
    };
-   private JTextField message_tf;
-   private JButton notesend_btn = new JButton("ÂÊÁöº¸³»±â");
-   private JButton joinroom_btn = new JButton("Ã¤ÆÃ¹æÂü¿©");
-   private JButton createroom_btn = new JButton("¹æ¸¸µé±â");
-   private JButton send_btn = new JButton("Àü¼Û");
-   private JButton exit_btn = new JButton("³ª°¡±â");
    
+   private JTextField message_tf;
+   private JButton notesend_btn = new JButton("ìª½ì§€ë³´ë‚´ê¸°");
+   private JButton joinroom_btn = new JButton("ì±„íŒ…ë°©ì°¸ì—¬");
+   private JButton createroom_btn = new JButton("ë°©ë§Œë“¤ê¸°");
+   private JButton send_btn = new JButton("ì „ì†¡");
+   private JButton exit_btn = new JButton("ë‚˜ê°€ê¸°");
+   //======================= ë°°ê²½í™”ë©´ ë²„íŠ¼ ìƒì„± ===============
+   /*Author : ìµœì¬í˜„*/
+   private JButton backgnd1_btn = new JButton("3");
+   private JButton backgnd2_btn = new JButton("2");
+   private JButton backgnd3_btn = new JButton("1");
+   private JButton return_btn = new JButton("");
+
+   //=======================================================
+
    private JList User_list = new JList();
    private JList Room_list = new JList();
    
    private JTextArea Chat_area = new JTextArea();
-   JScrollPane scrollPane = new JScrollPane(Chat_area){
+   JScrollPane scrollPane = new JScrollPane(){
    public void paintComponent(Graphics g){
-	  g.drawImage(chat_img.getImage(), 0, 0, null);
+	  g.drawImage(chat_img.getImage(), 0, 0, null); // ì±„íŒ… ì˜ì—­ ì‚¬ì§„ ì¶œë ¥
 	  setOpaque(false);
 	  super.paintComponent(g);
    }  
 };
    
-   //³×Æ®¿öÅ©¸¦ À§ÇÑ ÀÚ¿ø º¯¼ö
+   //ë„¤íŠ¸ì›Œí¬ë¥¼ ìœ„í•œ ìì› ë³€ìˆ˜
 
    private Socket socket;
-   private String ip="";// ÀÌ ¹øÈ£´Â ÀÚ±âÀÚ½Å
+   private String ip="";// ì´ ë²ˆí˜¸ëŠ” ìê¸°ìì‹ 
    private int port;
    private String id="";
    private InputStream is;
@@ -91,12 +105,12 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private DataInputStream dis;
    private DataOutputStream dos;
   
-   //±×¿Ü º¯¼öµé
+   //ê·¸ì™¸ ë³€ìˆ˜ë“¤
    Vector user_list = new Vector();
    Vector room_list = new Vector();
    StringTokenizer st;
    
-   private String My_Room; // ³»°¡ ÇöÀç Á¢¼ÓÇÑ ¹æ ÀÌ¸§
+   private String My_Room; // ë‚´ê°€ í˜„ì¬ ì ‘ì†í•œ ë°© ì´ë¦„
  
    
    
@@ -111,11 +125,35 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private void start()
    {
       login_btn.addActionListener(this);
+      notesend_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      notesend_btn.setBackground(Color.WHITE);
       notesend_btn.addActionListener(this);
+      joinroom_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      joinroom_btn.setBackground(Color.WHITE);
       joinroom_btn.addActionListener(this);
+      createroom_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      createroom_btn.setBackground(Color.WHITE);
       createroom_btn.addActionListener(this);
+      send_btn.setBackground(Color.WHITE);
       send_btn.addActionListener(this);
+      exit_btn.setBackground(Color.WHITE);
       exit_btn.addActionListener(this);
+      backgnd1_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      backgnd1_btn.setBackground(Color.WHITE);
+      //================ ë°°ê²½ ì´ë¯¸ì§€ ë²„íŠ¼ ëˆŒë¦¼ í™•ì¸=================
+      /*Author : ìµœì¬í˜„*/
+      backgnd1_btn.addActionListener(this);
+      backgnd2_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      backgnd2_btn.setBackground(Color.WHITE);
+      backgnd2_btn.addActionListener(this);
+      backgnd3_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      backgnd3_btn.setBackground(Color.WHITE);
+      backgnd3_btn.addActionListener(this);
+      
+      return_btn.setFont(new Font("HYë‹ì›€", Font.PLAIN, 10));
+      return_btn.setBackground(Color.WHITE);
+      return_btn.addActionListener(this);
+      //=======================================================
     
       message_tf.addKeyListener(this);
    }
@@ -123,72 +161,90 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private void Main_init()
    {
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      setBounds(100, 100, 580, 455);
+      setBounds(100, 100, 1460, 794);
       setResizable(false);
+      contentPane.setBackground(Color.WHITE);
      
       contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
       setContentPane(contentPane);
       contentPane.setLayout(null);
       
-      JLabel lbNewlabel = new JLabel("Àü Ã¼ Á¢ ¼Ó ÀÚ");
-      lbNewlabel.setBounds(12, 10, 86, 15);
+      JLabel lbNewlabel = new JLabel("ì „ ì²´ ì ‘ ì† ì");
+      lbNewlabel.setFont(new Font("HYë‹ì›€", Font.PLAIN, 12));
+      lbNewlabel.setBounds(124, 37, 86, 15);
       contentPane.add(lbNewlabel);
       
-      JScrollPane scrollPane_2 = new JScrollPane();
-      scrollPane_2.setBounds(12, 32, 109, 117);
-      contentPane.add(scrollPane_2);
       
-      scrollPane_2.setViewportView(User_list);
-      
-      
-      notesend_btn.setBounds(12, 159, 109, 23);
+      notesend_btn.setBounds(113, 124, 109, 23);
       contentPane.add(notesend_btn);
       
-      JLabel lblNewLabel_1 = new JLabel("Ã¤ÆÃ¹æ¸ñ·Ï");
-      lblNewLabel_1.setBounds(12, 192, 97, 15);
+      JLabel lblNewLabel_1 = new JLabel("ì±„íŒ…ë°©ëª©ë¡");
+      lblNewLabel_1.setFont(new Font("HYë‹ì›€", Font.PLAIN, 12));
+      lblNewLabel_1.setBounds(388, 37, 97, 15);
       contentPane.add(lblNewLabel_1);
-      
-      JScrollPane scrollPane_1 = new JScrollPane();
-      scrollPane_1.setBounds(12, 213, 109, 135);
-      contentPane.add(scrollPane_1);
-      
-      scrollPane_1.setViewportView(Room_list);
     
    
-      joinroom_btn.setBounds(12, 386, 109, 23);
+      joinroom_btn.setBounds(431, 124, 109, 23);
       contentPane.add(joinroom_btn);
       
-      createroom_btn.setBounds(12, 358, 109, 23);
+      createroom_btn.setBounds(313, 124, 109, 23);
       contentPane.add(createroom_btn);
 
-      scrollPane.setBounds(133, 29, 418, 347);         
+      scrollPane.setBounds(54, 157, 1390, 573);         
       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
       contentPane.add(scrollPane);
       
-      Chat_area.setBackground(null);
-      Chat_area.setOpaque(false);
-      
-      scrollPane.setBackground(null);   
+      scrollPane.setBackground(Color.WHITE);   
       scrollPane.setOpaque(false);
       scrollPane.getViewport().setOpaque(false);
       
-      scrollPane.setViewportView(Chat_area);
-      Chat_area.setEditable(false);
-      
       
       message_tf = new JTextField();
-      message_tf.setBounds(133, 387, 279, 21);
+      message_tf.setBounds(64, 740, 1233, 21);
       contentPane.add(message_tf);
       message_tf.setColumns(10);
       message_tf.setEnabled(false);
       
-      send_btn.setBounds(414, 386, 63, 23);
+      send_btn.setBounds(1299, 739, 63, 23);
       contentPane.add(send_btn);
       send_btn.setEnabled(false);
       
-      exit_btn.setBounds(479, 386, 80, 23);
+      exit_btn.setBounds(1364, 739, 80, 23);
       contentPane.add(exit_btn);
       exit_btn.setEnabled(false);
+      
+      
+    //================= ë°°ê²½ ì´ë¯¸ì§€ ë³€ê²½ ë²„íŠ¼ ìœ„ì¹˜ì„¤ì •, ë²„íŠ¼ì¶”ê°€==========
+      /*Author : ìµœì¬í˜„*/
+
+      backgnd1_btn.setBounds(1362, 124, 54, 23); 
+      contentPane.add(backgnd1_btn);		  
+      
+      backgnd2_btn.setBounds(1297, 124, 54, 23);
+      contentPane.add(backgnd2_btn);
+       
+      backgnd3_btn.setBounds(1231, 124, 54, 23);
+      contentPane.add(backgnd3_btn);
+      
+      return_btn.setBounds(1203, 124, 21, 23);
+      contentPane.add(return_btn);
+      Chat_area.setFont(new Font("Monospaced", Font.PLAIN, 16));
+      
+      Chat_area.setBounds(54, 157, 1390, 573);
+      contentPane.add(Chat_area);
+      Chat_area.setDisabledTextColor(new Color(72, 61, 139));
+      
+      Chat_area.setBackground(Color.WHITE);
+      Chat_area.setOpaque(false);
+      Chat_area.setEditable(false);
+      User_list.setFont(new Font("HYë‹ì›€", Font.PLAIN, 12));
+      User_list.setBounds(124, 62, 86, 52);
+      contentPane.add(User_list);
+      Room_list.setFont(new Font("HYë‹ì›€", Font.PLAIN, 12));
+      Room_list.setBounds(365, 56, 109, 52);
+      contentPane.add(Room_list);
+     
+      //==========================================================
       
       
       this.setVisible(false);
@@ -238,7 +294,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       id_tf.setColumns(10);
       
       
-      login_btn.setBounds(27, 294, 176, 23);
+      login_btn.setBounds(27, 294, 176, 23); // 'ì…ì¥'ë²„íŠ¼ ìœ„ì¹˜ ì„¤ì •
       Login_Pane.add(login_btn);
       
       Login_GUI.setVisible(true); 
@@ -250,20 +306,20 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       try {
          socket = new Socket(ip,port);
          
-         if(socket != null)//Á¤»óÀûÀ¸·Î ¼ÒÄÏÀÌ ¿¬°ÜµÇ¾úÀ»°æ¿ì
+         if(socket != null)//ì •ìƒì ìœ¼ë¡œ ì†Œì¼“ì´ ì—°ê²¨ë˜ì—ˆì„ê²½ìš°
          {
             Connection();
          }
       } catch (UnknownHostException e) {
          
-    	  JOptionPane.showMessageDialog(null,"¿¬°á ½ÇÆĞ","¾Ë¸²",JOptionPane.INFORMATION_MESSAGE);
+    	  JOptionPane.showMessageDialog(null,"ì—°ê²° ì‹¤íŒ¨","ì•Œë¦¼",JOptionPane.INFORMATION_MESSAGE);
       } catch (IOException e) {
-    	  JOptionPane.showMessageDialog(null,"¿¬°á ½ÇÆĞ","¾Ë¸²",JOptionPane.INFORMATION_MESSAGE);
+    	  JOptionPane.showMessageDialog(null,"ì—°ê²° ì‹¤íŒ¨","ì•Œë¦¼",JOptionPane.INFORMATION_MESSAGE);
       }
       
    }
    
-   private void Connection() // ½ÇÁ¦ÀûÀÎ ¸Ş¼Òµå ¿¬°áºÎºĞ
+   private void Connection() // ì‹¤ì œì ì¸ ë©”ì†Œë“œ ì—°ê²°ë¶€ë¶„
    {
       try{
       
@@ -275,18 +331,18 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       }
       catch(IOException e)
       {
-    	  JOptionPane.showMessageDialog(null,"¿¬°á ½ÇÆĞ","¾Ë¸²",JOptionPane.INFORMATION_MESSAGE);
-      } // Stream ¼³Á¤ ³¡
+    	  JOptionPane.showMessageDialog(null,"ì—°ê²° ì‹¤íŒ¨","ì•Œë¦¼",JOptionPane.INFORMATION_MESSAGE);
+      } // Stream ì„¤ì • ë
       
       
-      this.setVisible(true); // main UIÇ¥½Ã
+      this.setVisible(true); // main UIí‘œì‹œ
       this.Login_GUI.setVisible(false);
       
 
-      // Ã³À½ Á¢¼Ó½Ã¿¡ ID Àü¼Û
+      // ì²˜ìŒ ì ‘ì†ì‹œì— ID ì „ì†¡
       send_message(id);
       
-      // User_list ¿¡¼­ »ç¿ëÀÚ Ãß°¡
+      // User_list ì—ì„œ ì‚¬ìš©ì ì¶”ê°€
       user_list.add(id);
       User_list.setListData(user_list);
       
@@ -299,9 +355,9 @@ public class Client extends JFrame implements ActionListener,KeyListener {
     		{
 			
     			try {
-    				String msg = dis.readUTF(); // ¸Ş¼¼Áö¼ö½Å 
+    				String msg = dis.readUTF(); // ë©”ì„¸ì§€ìˆ˜ì‹  
 				
-    				System.out.println("¼­¹ö·ÎºÎÅÍ ¼ö½ÅµÈ ¸Ş¼¼Áö : "+msg);
+    				System.out.println("ì„œë²„ë¡œë¶€í„° ìˆ˜ì‹ ëœ ë©”ì„¸ì§€ : "+msg);
 				
     				inmessage(msg);
 				
@@ -313,7 +369,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
     				dos.close();
     				dis.close();
     				socket.close();
-    				JOptionPane.showMessageDialog(null,"¼­¹ö¿Í Á¢¼Ó ²÷¾îÁü","¾Ë¸²",JOptionPane.INFORMATION_MESSAGE);
+    				JOptionPane.showMessageDialog(null,"ì„œë²„ì™€ ì ‘ì† ëŠì–´ì§","ì•Œë¦¼",JOptionPane.INFORMATION_MESSAGE);
     				}
     				catch(IOException e1){
     					
@@ -334,7 +390,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    
    }
    
-   private void inmessage(String str) //¼­¹ö·ÎºÎÅÍ µé¾î¿À´Â ¸ğµç ¸Ş¼¼Áö
+   private void inmessage(String str) //ì„œë²„ë¡œë¶€í„° ë“¤ì–´ì˜¤ëŠ” ëª¨ë“  ë©”ì„¸ì§€
    {
 	   StringTokenizer st = new StringTokenizer(str, "/");
 	 
@@ -342,10 +398,10 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   String protocol = st.nextToken();
 	   String Message = st.nextToken();
 	   
-	   System.out.println("ÇÁ·ÎÅäÄİ :" +protocol);
-	   System.out.println("³»¿ë :"+Message);
+	   System.out.println("í”„ë¡œí† ì½œ :" +protocol);
+	   System.out.println("ë‚´ìš© :"+Message);
 	 
-	   if(protocol.equals("NewUser")) // »õ·Î¿î Á¢¼ÓÀÚ
+	   if(protocol.equals("NewUser")) // ìƒˆë¡œìš´ ì ‘ì†ì
 	   {
 		   user_list.add(Message);
 		   User_list.setListData(user_list);
@@ -361,13 +417,13 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   {
 		   String note = st.nextToken();
 
-		   System.out.println(Message+"»ç¿ëÀÚ·ÎºÎÅÍ ¿Â ÂÊÁö"+note);
+		   System.out.println(Message+"ì‚¬ìš©ìë¡œë¶€í„° ì˜¨ ìª½ì§€"+note);
 		   
 		   JOptionPane.showMessageDialog
-		   (null,note,Message+"´ÔÀ¸·Î ºÎÅÍ ÂÊÁö",JOptionPane.CLOSED_OPTION);
+		   (null,note,Message+"ë‹˜ìœ¼ë¡œ ë¶€í„° ìª½ì§€",JOptionPane.CLOSED_OPTION);
 	   }
 
-	   else if(protocol.equals("CreateRoom")) // ¹æÀ» ¸¸µé¾úÀ»¶§
+	   else if(protocol.equals("CreateRoom")) // ë°©ì„ ë§Œë“¤ì—ˆì„ë•Œ
 	   {
 		   My_Room = Message;
 		   message_tf.setEnabled(true);
@@ -377,11 +433,11 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 		   exit_btn.setEnabled(true);
 		   
 	   }
-	   else if(protocol.equals("CreateRoomFail")) // ¹æ¸¸µé±â ½ÇÆĞÇßÀ» °æ¿ì
+	   else if(protocol.equals("CreateRoomFail")) // ë°©ë§Œë“¤ê¸° ì‹¤íŒ¨í–ˆì„ ê²½ìš°
 	   {
-		   JOptionPane.showMessageDialog(null,"°°Àº ÀÌ¸§ÀÇ ¹æÀÌ Á¸Àç ÇÕ´Ï´Ù","¾Ë¸²",JOptionPane.ERROR_MESSAGE);
+		   JOptionPane.showMessageDialog(null,"ê°™ì€ ì´ë¦„ì˜ ë°©ì´ ì¡´ì¬ í•©ë‹ˆë‹¤","ì•Œë¦¼",JOptionPane.ERROR_MESSAGE);
 	   }
-	   else if(protocol.equals("New_Room")) // »õ·Î¿î ¹æÀ» ¸¸µé¾úÀ»¶§
+	   else if(protocol.equals("New_Room")) // ìƒˆë¡œìš´ ë°©ì„ ë§Œë“¤ì—ˆì„ë•Œ
 	   {
 		   room_list.add(Message);
 		   Room_list.setListData(room_list);   
@@ -407,7 +463,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 		   createroom_btn.setEnabled(false);
 		   exit_btn.setEnabled(true);
 		   
-		   JOptionPane.showMessageDialog(null,"Ã¤ÆÃ¹æ¿¡ ÀÔÀåÇß½À´Ï´Ù","¾Ë¸²",JOptionPane.INFORMATION_MESSAGE);
+		   JOptionPane.showMessageDialog(null,"ì±„íŒ…ë°©ì— ì…ì¥í–ˆìŠµë‹ˆë‹¤","ì•Œë¦¼",JOptionPane.INFORMATION_MESSAGE);
 	   }
 	   else if(protocol.equals("User_out"))
 	   {
@@ -432,7 +488,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   
    }
    
-   private void send_message(String str)//¼­¹ö¿¡°Ô ¸Ş¼¼Áö¸¦ º¸³»´Â ¸Ş¼Òµå
+   private void send_message(String str)//ì„œë²„ì—ê²Œ ë©”ì„¸ì§€ë¥¼ ë³´ë‚´ëŠ” ë©”ì†Œë“œ
    { 
       try {
          dos.writeUTF(str);
@@ -456,47 +512,73 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       
       if(e.getSource()==login_btn)
       {
-         System.out.println("·Î±×ÀÎ¹öÆ°");
+         System.out.println("ë¡œê·¸ì¸ë²„íŠ¼");
          
          if(ip_tf.getText().length()==0)
          {
-        	 ip_tf.setText("IP¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä");
+        	 ip_tf.setText("IPë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”");
         	 ip_tf.requestFocus();
          }
          else if(port_tf.getText().length()==0)
          {
-        	 port_tf.setText("Port¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä");
+        	 port_tf.setText("Portë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”");
         	 port_tf.requestFocus();
          }
          else if(id_tf.getText().length()==0)
          {
-        	 id_tf.setText("ID¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä");
+        	 id_tf.setText("IDë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”");
         	 id_tf.requestFocus();
          }
          else
          {
-        	 ip = ip_tf.getText().trim(); //trimÀº ºó°ø°£À» Á¦¿ÜÇÏ°í ÀÔ·ÂÀÌ µÈ°É·Î °¡´ÉÇÏ°Ô ÇÏ´Â°Í , ip¸¦ ¹Ş´Â°÷
+        	 ip = ip_tf.getText().trim(); //trimì€ ë¹ˆê³µê°„ì„ ì œì™¸í•˜ê³  ì…ë ¥ì´ ëœê±¸ë¡œ ê°€ëŠ¥í•˜ê²Œ í•˜ëŠ”ê²ƒ , ipë¥¼ ë°›ëŠ”ê³³
          
-        	 port = Integer.parseInt(port_tf.getText().trim());//intÇüÀ¸·Î Çüº¯È¯
+        	 port = Integer.parseInt(port_tf.getText().trim());//intí˜•ìœ¼ë¡œ í˜•ë³€í™˜
          
-        	 id = id_tf.getText().trim(); //id¹Ş¾Æ¿À´Â ºÎºĞ
+        	 id = id_tf.getText().trim(); //idë°›ì•„ì˜¤ëŠ” ë¶€ë¶„
          
         	 Network();
          }
       }
+      
+      // ====================== ë°°ê²½ ì´ë¯¸ì§€ ë³€ê²½ ë²„íŠ¼ í´ë¦­ ì‹œ ===========================
+      /*Author : ìµœì¬í˜„*/
+
+      else if(e.getSource()==backgnd3_btn)  
+      {
+    	  main_img=new ImageIcon("3.jpg");
+    	  contentPane.repaint();
+      }
+      else if(e.getSource()==backgnd2_btn)
+      {
+    	  main_img=new ImageIcon("2.jpg");
+    	  contentPane.repaint();
+      }
+      else if(e.getSource()==backgnd1_btn)
+      {
+    	  main_img=new ImageIcon("1.jpg");
+    	  contentPane.repaint();
+      }
+      else if(e.getSource()==return_btn)
+      {
+    	  main_img=new ImageIcon("main_sheet.jpg");
+    	  contentPane.repaint();
+      }
+      //================================================================
+      
       else if(e.getSource()==notesend_btn)
       {
-         System.out.println("ÂÊÁö º¸³»±â ¹öÆ° Å¬¸¯");
+         System.out.println("ìª½ì§€ ë³´ë‚´ê¸° ë²„íŠ¼ í´ë¦­");
          String user = (String)User_list.getSelectedValue();
-         String note = JOptionPane.showInputDialog("º¸³¾¸Ş¼¼Áö");
+         String note = JOptionPane.showInputDialog("ë³´ë‚¼ë©”ì„¸ì§€");
          
          if(note!=null)
          {
         	 send_message("Note/"+user+"/"+note);
-        	 // Note/User2/³ª´Â User1ÀÌ¾ß
+        	 // Note/User2/ë‚˜ëŠ” User1ì´ì•¼
         	 
          }
-         System.out.println("¹Ş´Â »ç¶÷ : "+user+"| º¸³¾ ³»¿ë :"+note);
+         System.out.println("ë°›ëŠ” ì‚¬ëŒ : "+user+"| ë³´ë‚¼ ë‚´ìš© :"+note);
          
       }
       else if(e.getSource()==joinroom_btn)
@@ -505,21 +587,21 @@ public class Client extends JFrame implements ActionListener,KeyListener {
     	 
     	 send_message("JoinRoom/"+JoinRoom); 
     	  
-         System.out.println("¹æÂü¿©¹öÆ°Å¬¸¯");
+         System.out.println("ë°©ì°¸ì—¬ë²„íŠ¼í´ë¦­");
       }
       else if(e.getSource()==createroom_btn)
       {
-    	 String roomname = JOptionPane.showInputDialog("¹æ ÀÌ¸§");
+    	 String roomname = JOptionPane.showInputDialog("ë°© ì´ë¦„");
     	 if(!(roomname == null))
     	 {
     		 send_message("CreateRoom/"+roomname);
     	 }
     	
-         System.out.println("¹æ¸¸µé±â¹öÆ°Å¬¸¯");
+         System.out.println("ë°©ë§Œë“¤ê¸°ë²„íŠ¼í´ë¦­");
       }
       else if(e.getSource()==send_btn)
       {
-    	  if(message_tf.getText() == null) // ÅØ½ºÆ®ÀÔ·Â ¾ÈÇÏ°í Àü¼ÛÇÏ¸é ¸ØÃß´ÂÇö»ó ÇØ°á
+    	  if(message_tf.getText() == null) // í…ìŠ¤íŠ¸ì…ë ¥ ì•ˆí•˜ê³  ì „ì†¡í•˜ë©´ ë©ˆì¶”ëŠ”í˜„ìƒ í•´ê²°
   		{
   			String msg = message_tf.getText();
   			msg = " ";
@@ -534,26 +616,26 @@ public class Client extends JFrame implements ActionListener,KeyListener {
   	   	 	message_tf.requestFocus();
   		}
     	 
-    	 // Chatting + ¹æÀÌ¸§ + ³»¿ë
+    	 // Chatting + ë°©ì´ë¦„ + ë‚´ìš©
     	
 
-         System.out.println("Àü¼Û¹öÆ°");
+         System.out.println("ì „ì†¡ë²„íŠ¼");
     	 
       }
       else if(e.getSource()==exit_btn)
       {
-    	  System.out.println("³ª°¡±â ¹öÆ° Å¬¸¯");
+    	  System.out.println("ë‚˜ê°€ê¸° ë²„íŠ¼ í´ë¦­");
     	  send_message("Exiting/"+My_Room);
     	 
       }
    }
 @Override
-public void keyPressed(KeyEvent e) { // ´­·¶À» ¶§
+public void keyPressed(KeyEvent e) { // ëˆŒë €ì„ ë•Œ
 	// TODO Auto-generated method stub
 	
 }
 @Override
-public void keyReleased(KeyEvent e) { // ´­·¶´Ù¶®À» ¶§
+public void keyReleased(KeyEvent e) { // ëˆŒë €ë‹¤ë• ì„ ë•Œ
 	
 	if(e.getKeyCode()==10)
 	{
@@ -568,17 +650,16 @@ public void keyReleased(KeyEvent e) { // ´­·¶´Ù¶®À» ¶§
 		else if(!(message_tf.getText() == null))
 		{
 			send_message("Chatting/"+My_Room+"/"+message_tf.getText());
-			message_tf.setText(" "); // ¸Ş¼¼Áö¸¦ º¸³»°í ³ª¸é ¸Ş¼¼Áö ¾²´ÂÃ¢À» ºñ¿î´Ù.
-	   	 	message_tf.requestFocus(); // ¸Ş¼¼Áö¸¦ º¸³»°í Ä¿¼­¸¦ ´Ù½Ã ÅØ½ºÆ® ÇÊµå·Î À§Ä¡½ÃÅ²´Ù
+			message_tf.setText(" "); // ë©”ì„¸ì§€ë¥¼ ë³´ë‚´ê³  ë‚˜ë©´ ë©”ì„¸ì§€ ì“°ëŠ”ì°½ì„ ë¹„ìš´ë‹¤.
+	   	 	message_tf.requestFocus(); // ë©”ì„¸ì§€ë¥¼ ë³´ë‚´ê³  ì»¤ì„œë¥¼ ë‹¤ì‹œ í…ìŠ¤íŠ¸ í•„ë“œë¡œ ìœ„ì¹˜ì‹œí‚¨ë‹¤
 		}
 	}
 	// TODO Auto-generated method stub
 	
 }
 @Override
-public void keyTyped(KeyEvent e) { // Å¸ÀÌÇÎÇßÀ» ¶§
+public void keyTyped(KeyEvent e) { // íƒ€ì´í•‘í–ˆì„ ë•Œ
 	// TODO Auto-generated method stub
 	
 }
-
 }
