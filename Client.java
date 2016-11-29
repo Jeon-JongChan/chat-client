@@ -133,6 +133,9 @@ private JScrollPane scrollPane;
 private File f;
 private String dir1;
 private String file1;
+//리스트 인덱수 수
+private JLabel lbNewlabel;
+private JLabel lblNewLabel_1;
 
    //네트워크를 위한 자원 변수
 
@@ -195,7 +198,7 @@ private String file1;
       setContentPane(contentPane);
       contentPane.setLayout(null);
       
-      JLabel lbNewlabel = new JLabel("전 체 접 속 자");
+      lbNewlabel = new JLabel("전 체 접 속 자");
       lbNewlabel.setBounds(12, 10, 86, 15);
       contentPane.add(lbNewlabel);
       
@@ -209,7 +212,7 @@ private String file1;
       notesend_btn.setBounds(12, 159, 109, 23);
       contentPane.add(notesend_btn);
       
-      JLabel lblNewLabel_1 = new JLabel("채팅방목록");
+      lblNewLabel_1 = new JLabel("채팅방목록");
       lblNewLabel_1.setBounds(12, 192, 97, 15);
       contentPane.add(lblNewLabel_1);
       
@@ -377,6 +380,8 @@ private String file1;
       // User_list 에서 사용자 추가
       user_list.add(id);
       User_list.setListData(user_list);
+      lbNewlabel.setText("전체접속자("+(User_list.getLastVisibleIndex()+1)+")");
+      lblNewLabel_1.setText("채팅방목록("+(Room_list.getLastVisibleIndex()+1)+")");
       
       Thread th = new Thread(new Runnable() {//쓰레드 생성
     		
@@ -393,7 +398,9 @@ private String file1;
                 System.out.println("서버로부터 수신된 메세지 : "+msg);
                 
                 inmessage(msg);//메시지 처리
-                
+                lbNewlabel.setText("전체접속자("+(User_list.getLastVisibleIndex()+1)+")");
+                lblNewLabel_1.setText("채팅방목록("+(Room_list.getLastVisibleIndex()+1)+")");
+ 			
  			} catch (IOException e) {//IO예외인 경우 stream과 소켓 닫음
 			
                 try{
@@ -703,7 +710,7 @@ private String file1;
          	  
               PrintWriter pw=new PrintWriter(f);
                //pw.println(Chat_area.getText());
-              pw.println(icon);
+              pw.println(icon.toString());
                pw.close();
                textPane.setText(textPane.getText()+"사진이 저장되었습니다.\n");
                System.out.println("사진이 저장되었습니다.\n");
