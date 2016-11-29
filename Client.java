@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -79,6 +80,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private JButton createroom_btn = new JButton("방만들기");
    private JButton send_btn = new JButton("전송");
    private JButton exit_btn = new JButton("나가기");
+   private JLabel lbTimelabel = new JLabel(" ?");
    
    private JList User_list = new JList();
    private JList Room_list = new JList();
@@ -92,12 +94,16 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    }  
 };
    //메뉴바
-private JMenu menu_talk=new JMenu("대화");
-private JMenu menu_Exit=new JMenu("종료");
 private JMenuBar bar=new JMenuBar();
-private JMenuItem itemOpen=new JMenuItem("불러오기");
-private JMenuItem itemSave=new JMenuItem("저장");
+private JMenu menu_talk=new JMenu("대화내용");
+private JMenuItem talkOpen=new JMenuItem("불러오기");
+private JMenuItem talkSave=new JMenuItem("저장");
 private JMenuItem itemExit=new JMenuItem("끝내기");
+
+private JMenu menu_pics=new JMenu("사진파일");
+private JMenuItem picsOpen=new JMenuItem("불러오기");
+private JMenuItem picsSave=new JMenuItem("저장");
+
    //네트워크를 위한 자원 변수
 
    private Socket socket;
@@ -137,9 +143,12 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
       createroom_btn.addActionListener(this);
       send_btn.addActionListener(this);
       exit_btn.addActionListener(this);
-      itemOpen.addActionListener(this);
-      itemSave.addActionListener(this);
+      
+      talkOpen.addActionListener(this);
+      talkSave.addActionListener(this);
       itemExit.addActionListener(this);
+      picsOpen.addActionListener(this);
+      picsSave.addActionListener(this);
     //텍스트필드 1개 키 리스너
       message_tf.addKeyListener(this);
    }
@@ -184,7 +193,12 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
       
       createroom_btn.setBounds(12, 358, 109, 23);
       contentPane.add(createroom_btn);
-
+      
+      Date date=new Date();
+      lbTimelabel.setBounds(300, 10, 286, 15);
+      contentPane.add(lbTimelabel);
+      lbTimelabel.setText("접속시간 : "+date.toString());
+      
       scrollPane.setBounds(133, 29, 418, 347);         
       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
       contentPane.add(scrollPane);
@@ -215,11 +229,12 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
       exit_btn.setEnabled(false);
       this.setJMenuBar(bar);
       bar.add(menu_talk);
-       bar.add(menu_Exit);
-       menu_talk.add(itemOpen);
-       menu_talk.add(itemSave);
+       menu_talk.add(talkOpen);
+       menu_talk.add(talkSave);
        menu_talk.add(itemExit);
-      
+       bar.add(menu_pics);
+       menu_pics.add(picsOpen);
+       menu_pics.add(picsSave);
       this.setVisible(false);
    }
    
@@ -326,14 +341,15 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
   		 
       		while(true) //프로그램 종료전까지 계속 실행
           {
-         
+             
+      		
              try {
                 String msg = dis.readUTF(); // 메세지수신 
             
                 System.out.println("서버로부터 수신된 메세지 : "+msg);
             
                 inmessage(msg);//메시지 처리
-				
+                
  			} catch (IOException e) {//IO예외인 경우 stream과 소켓 닫음
 			
                 try{
@@ -417,9 +433,11 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
       }
       else if(protocol.equals("Chatting"))//채팅방에서 대화 주고받을 때
 	   {
+    	  Date date=new Date();
+    	  
 		   String msg = st.nextToken();//str에서 세번째/ 이후의 문자열
 		   
-		   Chat_area.append(Message+" : "+msg+"\n");
+		   Chat_area.append("["+date+"] "+Message+" : "+msg+"\n");
 		   System.out.println(Chat_area.getText());
 		   scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
 	   }
@@ -588,7 +606,7 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
             e1.printStackTrace();
          }
       }
-      else if(e.getSource()==itemOpen){
+      else if(e.getSource()==talkOpen){
          System.out.println("불러오기!!"); 
          FileDialog fd=new FileDialog(this, "대화 불러오기", FileDialog.LOAD);
           fd.show();
@@ -608,7 +626,7 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
           }catch(Exception e1){  }
         
       }
-      else if(e.getSource()==itemSave){
+      else if(e.getSource()==talkSave){
          System.out.println("저장!!");
          FileDialog fd=new FileDialog(this, "대화 저장", FileDialog.SAVE);
           fd.show();
@@ -648,7 +666,7 @@ public void keyReleased(KeyEvent e) { // 눌렀다땠을 때
       {
          send_message("Chatting/"+My_Room+"/"+message_tf.getText());
          message_tf.setText(" "); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
-             message_tf.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
+         message_tf.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
       }
    }
    // TODO Auto-generated method stub
