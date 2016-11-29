@@ -1,54 +1,69 @@
 
 package 채팅클라이언트;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.Style;
 
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
+
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.FileDialog;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.LayoutManager;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.Date;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+
 
 //ActionListener와 KeyListener를 상속받는다. 
 public class Client extends JFrame implements ActionListener,KeyListener {
 // 자동 재정의 ctrl+shift+o
    
    //Login GUI 변수
-   final ImageIcon logo_img = new ImageIcon("src\\a.png");
+   final ImageIcon logo_img = new ImageIcon("src\\icon.png");
    private JFrame Login_GUI = new JFrame();
    private JPanel Login_Pane = new JPanel();
    private JPanel logo_pane = new JPanel(){
@@ -65,8 +80,8 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    
    
    //Main GUI 변수
-   final ImageIcon main_img = new ImageIcon("src\\b.png");
-   final ImageIcon chat_img = new ImageIcon("src\\c.png");
+   final ImageIcon main_img = new ImageIcon("src\\off.png");
+   final ImageIcon chat_img = new ImageIcon("src\\on.png");
    private JPanel contentPane = new JPanel(){//ContentPane의 이미지배경
       public void paintComponent(Graphics g){
            g.drawImage(main_img.getImage(), 0, 0, null);
@@ -86,13 +101,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private JList Room_list = new JList();
    
    private JTextArea Chat_area = new JTextArea();//채팅방 대화화면
-   JScrollPane scrollPane = new JScrollPane(Chat_area){
-   public void paintComponent(Graphics g){//paintComponent의 이미지배경
-	  g.drawImage(chat_img.getImage(), 0, 0, null);
-	  setOpaque(false);
-	  super.paintComponent(g);
-   }  
-};
+   
    //메뉴바
 private JMenuBar bar=new JMenuBar();
 private JMenu menu_talk=new JMenu("대화내용");
@@ -103,6 +112,27 @@ private JMenuItem itemExit=new JMenuItem("끝내기");
 private JMenu menu_pics=new JMenu("사진파일");
 private JMenuItem picsOpen=new JMenuItem("불러오기");
 private JMenuItem picsSave=new JMenuItem("저장");
+//이미지파일
+private StyleContext context = new StyleContext();
+private StyledDocument document = new DefaultStyledDocument(context);
+
+//내 메세지 스타일 객체 설정
+private Style myMessageStyle = context.getStyle(StyleContext.DEFAULT_STYLE);
+
+// 속성 객체 설정
+private SimpleAttributeSet attributes = new SimpleAttributeSet();
+// 레이블(이미지용) 스타일 객체 설정
+private Style labelStyle = context.getStyle(StyleContext.DEFAULT_STYLE);
+private Icon icon;
+private JLabel label;
+private JFrame frame = new JFrame();
+private Container content = frame.getContentPane();
+private JTextPane textPane = new JTextPane(document);
+private ImageIcon image;
+private JScrollPane scrollPane;
+private File f;
+private String dir1;
+private String file1;
 
    //네트워크를 위한 자원 변수
 
@@ -155,9 +185,11 @@ private JMenuItem picsSave=new JMenuItem("저장");
    
    private void Main_init()//Main GUI설정 메소드
    {
+	   
+	   
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setBounds(100, 100, 580, 455);
-      setResizable(false);
+      setResizable(true);
      
       contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
       setContentPane(contentPane);
@@ -199,19 +231,31 @@ private JMenuItem picsSave=new JMenuItem("저장");
       contentPane.add(lbTimelabel);
       lbTimelabel.setText("접속시간 : "+date.toString());
       
+      StyleConstants.setAlignment(myMessageStyle, StyleConstants.ALIGN_LEFT);
+      textPane.setEditable(false);
+      textPane.setBackground(null);
+      textPane.setOpaque(false);
+      scrollPane = new JScrollPane(textPane){
+    	   public void paintComponent(Graphics g){//paintComponent의 이미지배경
+    		  g.drawImage(chat_img.getImage(), 0, 0, null);
+    		  setOpaque(false);
+    		  super.paintComponent(g);
+    	   }  
+    	};
+      
       scrollPane.setBounds(133, 29, 418, 347);         
       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
       contentPane.add(scrollPane);
       
-      Chat_area.setBackground(null);
-      Chat_area.setOpaque(false);
+      //Chat_area.setBackground(null);
+      //Chat_area.setOpaque(false);
       
       scrollPane.setBackground(null);   
       scrollPane.setOpaque(false);
       scrollPane.getViewport().setOpaque(false);
-      
-      scrollPane.setViewportView(Chat_area);
-      Chat_area.setEditable(false);
+      scrollPane.setViewportView(textPane);
+      //scrollPane.setViewportView(Chat_area);
+      //Chat_area.setEditable(false);
       
       
       message_tf = new JTextField();
@@ -347,7 +391,7 @@ private JMenuItem picsSave=new JMenuItem("저장");
                 String msg = dis.readUTF(); // 메세지수신 
             
                 System.out.println("서버로부터 수신된 메세지 : "+msg);
-            
+                
                 inmessage(msg);//메시지 처리
                 
  			} catch (IOException e) {//IO예외인 경우 stream과 소켓 닫음
@@ -381,9 +425,10 @@ private JMenuItem picsSave=new JMenuItem("저장");
    
    private void inmessage(String str) //서버로부터 들어오는 모든 메세지
    {
+	  
       StringTokenizer st = new StringTokenizer(str, "/");
       //str메시지를 파싱하여 토큰(/) 분리
-  	
+      
 	   String protocol = st.nextToken();//str에서 첫번째/ 이후의 문자열
 	   String Message = st.nextToken();//str에서 두번째/ 이후의 문자열
 	   
@@ -433,12 +478,12 @@ private JMenuItem picsSave=new JMenuItem("저장");
       }
       else if(protocol.equals("Chatting"))//채팅방에서 대화 주고받을 때
 	   {
+    	  String msg = st.nextToken();//str에서 세번째/ 이후의 문자열
     	  Date date=new Date();
-    	  
-		   String msg = st.nextToken();//str에서 세번째/ 이후의 문자열
-		   
-		   Chat_area.append("["+date+"] "+Message+" : "+msg+"\n");
-		   System.out.println(Chat_area.getText());
+		   textPane.setText(textPane.getText()+"\n["+date+"] "+Message+" : "+msg+"\n");
+		   System.out.println(textPane.getText());
+		   //Chat_area.append("["+date+"] "+Message+" : "+msg+"\n");
+		   //System.out.println(Chat_area.getText());
 		   scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
 	   }
 	   else if(protocol.equals("OldRoom"))//기존에 있던 방
@@ -464,7 +509,8 @@ private JMenuItem picsSave=new JMenuItem("저장");
 	   }
 	   else if(protocol.equals("Chat_area_Clear"))//채팅방 대화 Clear
 	   {
-		   Chat_area.removeAll();
+		   //Chat_area.removeAll();
+		   textPane.removeAll();
 	   }
 	   else if(protocol.equals("Exiting"))//채팅방 나갈 때
 	   {
@@ -620,8 +666,10 @@ private JMenuItem picsSave=new JMenuItem("저장");
                   String data="";
                   data=br.readLine();
                   if(data==null)break;
-                  Chat_area.append(data+"\n");
-                  
+                  //Chat_area.append(data+"\n");
+                  textPane.setText("\n"+textPane.getText()+data+"\n");
+                  scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+           	   
               }
           }catch(Exception e1){  }
         
@@ -633,15 +681,55 @@ private JMenuItem picsSave=new JMenuItem("저장");
           String dir=fd.getDirectory();
           String file=fd.getFile();
           if(dir==null||file==null) return;
-          File f=new File(dir+file);
+          f=new File(dir+file);
           try{
+        	  
              PrintWriter pw=new PrintWriter(f);
-              pw.println(Chat_area.getText());
+              //pw.println(Chat_area.getText());
+             pw.println(textPane.getText());
               pw.close();
+              textPane.setText(textPane.getText()+"대화가 저장되었습니다.\n");
               System.out.println("대화내용이 저장되었습니다.\n");
           }catch(Exception e1){  }
-      }
-      
+      } else if(e.getSource()==picsSave){
+          System.out.println("저장!!");
+          FileDialog fd=new FileDialog(this, "사진 저장", FileDialog.SAVE);
+           fd.show();
+           String dir=fd.getDirectory();
+           String file=fd.getFile();
+           if(dir==null||file==null) return;
+           f=new File(dir1+file1);
+           try{
+         	  
+              PrintWriter pw=new PrintWriter(f);
+               //pw.println(Chat_area.getText());
+              pw.println(icon);
+               pw.close();
+               textPane.setText(textPane.getText()+"사진이 저장되었습니다.\n");
+               System.out.println("사진이 저장되었습니다.\n");
+           }catch(Exception e1){  }
+       }
+      else if(e.getSource()==picsOpen){
+          System.out.println("불러오기!!"); 
+          FileDialog fd=new FileDialog(this, "대화 불러오기", FileDialog.LOAD);
+           fd.show();
+           dir1=fd.getDirectory();
+           file1=fd.getFile();
+           
+           if(dir1==null||file1==null) return;
+        // 메세지 콘텐츠 삽입
+    	   try {
+    		   Date date=new Date();
+    	        textPane.setText(textPane.getText()+"\n["+date+"]\n");
+    	    	icon = new ImageIcon(dir1+file1);
+    	        label = new JLabel(icon);
+    	        StyleConstants.setComponent(labelStyle, label);
+    	        document.insertString(document.getLength(), "\n", labelStyle);
+    	        scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+    	   } catch (BadLocationException badLocationException) {
+    	      System.err.println("Oops");
+    	   }
+       }
    }
      
 @Override
