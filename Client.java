@@ -2,6 +2,7 @@
 package 채팅클라이언트;
 
 
+import java.awt.FileDialog;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,9 +10,17 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
@@ -29,21 +38,24 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
 //ActionListener와 KeyListener를 상속받는다. 
 public class Client extends JFrame implements ActionListener,KeyListener {
 // 자동 재정의 ctrl+shift+o
-	
+   
    //Login GUI 변수
-   final ImageIcon logo_img = new ImageIcon("a.png");
+   final ImageIcon logo_img = new ImageIcon("src\\a.png");
    private JFrame Login_GUI = new JFrame();
    private JPanel Login_Pane = new JPanel();
    private JPanel logo_pane = new JPanel(){
-	   public void paintComponent(Graphics g){//logo_pane의 이미지배경
-		   g.drawImage(logo_img.getImage(),0,0,null);
-		   setOpaque(false);
-		   super.paintComponent(g);
-	   };
+      public void paintComponent(Graphics g){//logo_pane의 이미지배경
+         g.drawImage(logo_img.getImage(),0,0,null);
+         setOpaque(false);
+         super.paintComponent(g);
+      };
    }; 
    private JTextField ip_tf; //ip 텍스트필드
    private JTextField port_tf; //port 텍스트필드
@@ -52,14 +64,14 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    
    
    //Main GUI 변수
-   final ImageIcon main_img = new ImageIcon("b.png");
-   final ImageIcon chat_img = new ImageIcon("c.png");
+   final ImageIcon main_img = new ImageIcon("src\\b.png");
+   final ImageIcon chat_img = new ImageIcon("src\\c.png");
    private JPanel contentPane = new JPanel(){//ContentPane의 이미지배경
-	   public void paintComponent(Graphics g){
-			  g.drawImage(main_img.getImage(), 0, 0, null);
-			  setOpaque(false);
-			  super.paintComponent(g);
-		  };
+      public void paintComponent(Graphics g){
+           g.drawImage(main_img.getImage(), 0, 0, null);
+           setOpaque(false);
+           super.paintComponent(g);
+        };
    };
    private JTextField message_tf;//채팅방 대화
    private JButton notesend_btn = new JButton("쪽지보내기");
@@ -79,7 +91,13 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	  super.paintComponent(g);
    }  
 };
-   
+   //메뉴바
+private JMenu menu_talk=new JMenu("대화");
+private JMenu menu_Exit=new JMenu("종료");
+private JMenuBar bar=new JMenuBar();
+private JMenuItem itemOpen=new JMenuItem("불러오기");
+private JMenuItem itemSave=new JMenuItem("저장");
+private JMenuItem itemExit=new JMenuItem("끝내기");
    //네트워크를 위한 자원 변수
 
    private Socket socket;
@@ -90,7 +108,10 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    private OutputStream os;
    private DataInputStream dis;
    private DataOutputStream dos;
-  
+   
+   private BufferedInputStream bis;
+   private BufferedOutputStream bos;
+   
    //그외 변수들
    Vector user_list = new Vector();//User 원소 관리
    Vector room_list = new Vector();//Room 원소 관리
@@ -116,6 +137,9 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       createroom_btn.addActionListener(this);
       send_btn.addActionListener(this);
       exit_btn.addActionListener(this);
+      itemOpen.addActionListener(this);
+      itemSave.addActionListener(this);
+      itemExit.addActionListener(this);
     //텍스트필드 1개 키 리스너
       message_tf.addKeyListener(this);
    }
@@ -189,7 +213,12 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       exit_btn.setBounds(479, 386, 80, 23);
       contentPane.add(exit_btn);
       exit_btn.setEnabled(false);
-      
+      this.setJMenuBar(bar);
+      bar.add(menu_talk);
+       bar.add(menu_Exit);
+       menu_talk.add(itemOpen);
+       menu_talk.add(itemSave);
+       menu_talk.add(itemExit);
       
       this.setVisible(false);
    }
@@ -197,8 +226,8 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    
    private void Login_init()//Login GUI설정 메소드
    {
-	 
-	   
+    
+      
       Login_GUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       Login_GUI.setBounds(100, 100, 226, 361);
       Login_GUI.setResizable(false);
@@ -258,7 +287,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
          
     	  JOptionPane.showMessageDialog(null,"연결 실패","알림",JOptionPane.INFORMATION_MESSAGE);
       } catch (IOException e) {//IO예외의 경우
-    	  JOptionPane.showMessageDialog(null,"연결 실패","알림",JOptionPane.INFORMATION_MESSAGE);
+         JOptionPane.showMessageDialog(null,"연결 실패","알림",JOptionPane.INFORMATION_MESSAGE);
       }
       
    }
@@ -275,7 +304,7 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       }
       catch(IOException e)
       {
-    	  JOptionPane.showMessageDialog(null,"연결 실패","알림",JOptionPane.INFORMATION_MESSAGE);
+         JOptionPane.showMessageDialog(null,"연결 실패","알림",JOptionPane.INFORMATION_MESSAGE);
       } // Stream 설정 끝
       
       
@@ -291,54 +320,54 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       User_list.setListData(user_list);
       
       Thread th = new Thread(new Runnable() {//쓰레드 생성
-	
-    	@Override
-		public void run() {//쓰레드 실행
-		 
-    		while(true) //프로그램 종료전까지 계속 실행
-    		{
-			
-    			try {
-    				String msg = dis.readUTF(); // 메세지수신 
+    		
+      	@Override
+  		public void run() {//쓰레드 실행
+  		 
+      		while(true) //프로그램 종료전까지 계속 실행
+          {
+         
+             try {
+                String msg = dis.readUTF(); // 메세지수신 
+            
+                System.out.println("서버로부터 수신된 메세지 : "+msg);
+            
+                inmessage(msg);//메시지 처리
 				
-    				System.out.println("서버로부터 수신된 메세지 : "+msg);
-				
-    				inmessage(msg);//메시지 처리
-				
-    			} catch (IOException e) {//IO예외인 경우 stream과 소켓 닫음
+ 			} catch (IOException e) {//IO예외인 경우 stream과 소켓 닫음
 			
-    				try{
-    				os.close();
-    				is.close();
-    				dos.close();
-    				dis.close();
-    				socket.close();
-    				JOptionPane.showMessageDialog(null,"서버와 접속 끊어짐","알림",JOptionPane.INFORMATION_MESSAGE);
-    				}
-    				catch(IOException e1){
-    					
-    				}
-    				break;
-    				
-    			} 
-			
-					
-    		}
-		
-		
-    	}
+                try{
+                os.close();
+                is.close();
+                dos.close();
+                dis.close();
+                socket.close();
+                JOptionPane.showMessageDialog(null,"서버와 접속 끊어짐","알림",JOptionPane.INFORMATION_MESSAGE);
+                }
+                catch(IOException e1){
+                   
+                }
+                break;
+                
+             } 
+         
+               
+          }
+      
+      
+       }
       });
-	   th.start();//쓰레드 실행
-	 
-		
+      th.start();//쓰레드 실행
+    
+      
    
    }
    
-   private void inmessage(String str) //서버로부터 들어오는 메세지 처리
+   private void inmessage(String str) //서버로부터 들어오는 모든 메세지
    {
-	   StringTokenizer st = new StringTokenizer(str, "/");
-	   //str메시지를 파싱하여 토큰(/) 분리
-	
+      StringTokenizer st = new StringTokenizer(str, "/");
+      //str메시지를 파싱하여 토큰(/) 분리
+  	
 	   String protocol = st.nextToken();//str에서 첫번째/ 이후의 문자열
 	   String Message = st.nextToken();//str에서 두번째/ 이후의 문자열
 	   
@@ -346,13 +375,13 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   System.out.println("내용 :"+Message);
 	 
 	   if(protocol.equals("NewUser")) // 새로운 접속자
-	   {
-		   user_list.add(Message);
-		   User_list.setListData(user_list);
-		   // AWT List add();
-	   }
-	   
-	   else if(protocol.equals("OldUser"))//기존 접속자
+      {
+         user_list.add(Message);
+         User_list.setListData(user_list);
+         // AWT List add();
+      }
+      
+      else if(protocol.equals("OldUser"))//기존 접속자
 	   {
 		   user_list.add(Message);	  
 		   User_list.setListData(user_list);
@@ -361,32 +390,32 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   {
 		   String note = st.nextToken();//str에서 세번째/ 이후의 문자열
 
-		   System.out.println(Message+"사용자로부터 온 쪽지"+note);
-		   
-		   JOptionPane.showMessageDialog
-		   (null,note,Message+"님으로 부터 쪽지",JOptionPane.CLOSED_OPTION);
-	   }
+         System.out.println(Message+"사용자로부터 온 쪽지"+note);
+         
+         JOptionPane.showMessageDialog
+         (null,note,Message+"님으로 부터 쪽지",JOptionPane.CLOSED_OPTION);
+      }
 
-	   else if(protocol.equals("CreateRoom")) // 방을 만들었을때
-	   {
-		   My_Room = Message;
-		   message_tf.setEnabled(true);
-		   send_btn.setEnabled(true);
-		   joinroom_btn.setEnabled(false);
-		   createroom_btn.setEnabled(false);
-		   exit_btn.setEnabled(true);
-		   
-	   }
-	   else if(protocol.equals("CreateRoomFail")) // 방만들기 실패했을 경우
-	   {
-		   JOptionPane.showMessageDialog(null,"같은 이름의 방이 존재 합니다","알림",JOptionPane.ERROR_MESSAGE);
-	   }
-	   else if(protocol.equals("New_Room")) // 새로운 방을 만들었을때
-	   {
-		   room_list.add(Message);
-		   Room_list.setListData(room_list);   
-	   }
-	   else if(protocol.equals("Chatting"))//채팅방에서 대화 주고받을 때
+      else if(protocol.equals("CreateRoom")) // 방을 만들었을때
+      {
+         My_Room = Message;
+         message_tf.setEnabled(true);
+         send_btn.setEnabled(true);
+         joinroom_btn.setEnabled(false);
+         createroom_btn.setEnabled(false);
+         exit_btn.setEnabled(true);
+         
+      }
+      else if(protocol.equals("CreateRoomFail")) // 방만들기 실패했을 경우
+      {
+         JOptionPane.showMessageDialog(null,"같은 이름의 방이 존재 합니다","알림",JOptionPane.ERROR_MESSAGE);
+      }
+      else if(protocol.equals("New_Room")) // 새로운 방을 만들었을때
+      {
+         room_list.add(Message);
+         Room_list.setListData(room_list);   
+      }
+      else if(protocol.equals("Chatting"))//채팅방에서 대화 주고받을 때
 	   {
 		   String msg = st.nextToken();//str에서 세번째/ 이후의 문자열
 		   
@@ -400,17 +429,17 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 		   Room_list.setListData(room_list);
 	   }
 	   else if(protocol.equals("JoinRoom"))//방에 들어갈 때
-	   {
-		   My_Room = Message;
-		   message_tf.setEnabled(true);
-		   send_btn.setEnabled(true);
-		   joinroom_btn.setEnabled(false);
-		   createroom_btn.setEnabled(false);
-		   exit_btn.setEnabled(true);
-		   
-		   JOptionPane.showMessageDialog(null,"채팅방에 입장했습니다","알림",JOptionPane.INFORMATION_MESSAGE);
-	   }
-	   else if(protocol.equals("User_out"))//접속자가 나갈 때
+      {
+         My_Room = Message;
+         message_tf.setEnabled(true);
+         send_btn.setEnabled(true);
+         joinroom_btn.setEnabled(false);
+         createroom_btn.setEnabled(false);
+         exit_btn.setEnabled(true);
+         
+         JOptionPane.showMessageDialog(null,"채팅방에 입장했습니다","알림",JOptionPane.INFORMATION_MESSAGE);
+      }
+      else if(protocol.equals("User_out"))//접속자가 나갈 때
 	   {
 		   user_list.remove(Message);
 		   User_list.setListData(user_list);
@@ -422,15 +451,15 @@ public class Client extends JFrame implements ActionListener,KeyListener {
 	   else if(protocol.equals("Exiting"))//채팅방 나갈 때
 	   {
 
-		   
-		   message_tf.setEnabled(false);
-		   send_btn.setEnabled(false);
-		   joinroom_btn.setEnabled(true);
-		   createroom_btn.setEnabled(true);
-		   exit_btn.setEnabled(false);
-		   
-	   }
-	   
+         
+         message_tf.setEnabled(false);
+         send_btn.setEnabled(false);
+         joinroom_btn.setEnabled(true);
+         createroom_btn.setEnabled(true);
+         exit_btn.setEnabled(false);
+         
+      }
+      
    }
    
    private void send_message(String str)//서버에게 메세지를 보내는 메소드
@@ -446,46 +475,46 @@ public class Client extends JFrame implements ActionListener,KeyListener {
    
    
    public static void main(String[] args) {//메인
-   
-      new Client();//client객체 생성
+	   
+	      new Client();//client객체 생성
 
    }
 
    @Override
    public void actionPerformed(ActionEvent e) {//액션이벤트 수행
-      // TODO Auto-generated method stub
-      
-      if(e.getSource()==login_btn)//login_btn눌렀을 때
-      {
-         System.out.println("로그인버튼");
-         
-         if(ip_tf.getText().length()==0)//ip를 입력하지 않았을 때
-         {
-        	 ip_tf.setText("IP를 입력해주세요");
-        	 ip_tf.requestFocus();
-         }
-         else if(port_tf.getText().length()==0)//port를 입력하지 않았을 때
-         {
-        	 port_tf.setText("Port번호를 입력해주세요");
-        	 port_tf.requestFocus();
-         }
-         else if(id_tf.getText().length()==0)//id를 입력하지 않았을 때
-         {
-        	 id_tf.setText("ID를 입력해주세요");
-        	 id_tf.requestFocus();
-         }
-         else//소켓 연결 전
-         {
-        	 ip = ip_tf.getText().trim(); //trim은 빈공간을 제외하고 입력이 된걸로 가능하게 하는것 , ip를 받는곳
-         
-        	 port = Integer.parseInt(port_tf.getText().trim());//int형으로 형변환
-         
-        	 id = id_tf.getText().trim(); //id받아오는 부분
-         
-        	 Network();//소켓을 정상적으로 연결하기 위한 메소드
-         }
-      }
-      else if(e.getSource()==notesend_btn)//notesend_btn을 눌렀을 때
+	      // TODO Auto-generated method stub
+	      
+	      if(e.getSource()==login_btn)//login_btn눌렀을 때
+	      {
+	         System.out.println("로그인버튼");
+	         
+	         if(ip_tf.getText().length()==0)//ip를 입력하지 않았을 때
+	         {
+	        	 ip_tf.setText("IP를 입력해주세요");
+	        	 ip_tf.requestFocus();
+	         }
+	         else if(port_tf.getText().length()==0)//port를 입력하지 않았을 때
+	         {
+	        	 port_tf.setText("Port번호를 입력해주세요");
+	        	 port_tf.requestFocus();
+	         }
+	         else if(id_tf.getText().length()==0)//id를 입력하지 않았을 때
+	         {
+	        	 id_tf.setText("ID를 입력해주세요");
+	        	 id_tf.requestFocus();
+	         }
+	         else//소켓 연결 전
+	         {
+	        	 ip = ip_tf.getText().trim(); //trim은 빈공간을 제외하고 입력이 된걸로 가능하게 하는것 , ip를 받는곳
+	         
+	        	 port = Integer.parseInt(port_tf.getText().trim());//int형으로 형변환
+	         
+	        	 id = id_tf.getText().trim(); //id받아오는 부분
+	         
+	        	 Network();//소켓을 정상적으로 연결하기 위한 메소드
+	         }
+	      }
+	      else if(e.getSource()==notesend_btn)//notesend_btn을 눌렀을 때
       {
          System.out.println("쪽지 보내기 버튼 클릭");
          String user = (String)User_list.getSelectedValue();
@@ -493,9 +522,9 @@ public class Client extends JFrame implements ActionListener,KeyListener {
          
          if(note!=null)
          {
-        	 send_message("Note/"+user+"/"+note);
-        	 // Note/User2/나는 User1이야
-        	 
+            send_message("Note/"+user+"/"+note);
+            // Note/User2/나는 User1이야
+            
          }
          System.out.println("받는 사람 : "+user+"| 보낼 내용 :"+note);
          
@@ -522,13 +551,13 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       {
     	  if(message_tf.getText() == null) // 텍스트입력 안하고 전송하면 멈추는현상 해결
   		{
-  			String msg = message_tf.getText();
-  			msg = " ";
-  			send_message("Chatting/"+My_Room+"/"+msg);
-  			message_tf.setText(" ");
-  			message_tf.requestFocus();
-  		}
-  		else if(!(message_tf.getText() == null))//텍스트 입력하여 전송
+           String msg = message_tf.getText();
+           msg = " ";
+           send_message("Chatting/"+My_Room+"/"+msg);
+           message_tf.setText(" ");
+           message_tf.requestFocus();
+        }
+        else if(!(message_tf.getText() == null))//텍스트 입력하여 전송
   		{
   			send_message("Chatting/"+My_Room+"/"+message_tf.getText());
   			message_tf.setText(" ");
@@ -541,43 +570,94 @@ public class Client extends JFrame implements ActionListener,KeyListener {
       }
       else if(e.getSource()==exit_btn)//exit_btn을 눌렀을 때
       {
-    	  System.out.println("나가기 버튼 클릭");
-    	  send_message("Exiting/"+My_Room);
-    	 
+         System.out.println("나가기 버튼 클릭");
+         send_message("Exiting/"+My_Room);
+        
       }
+      else if(e.getSource()==itemExit){
+         System.out.println("종료!!");
+         try {
+            os.close();
+            is.close();
+            dos.close();
+            dis.close();
+            socket.close();
+             System.exit(0);
+         } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+         }
+      }
+      else if(e.getSource()==itemOpen){
+         System.out.println("불러오기!!"); 
+         FileDialog fd=new FileDialog(this, "대화 불러오기", FileDialog.LOAD);
+          fd.show();
+          String dir=fd.getDirectory();
+          String file=fd.getFile();
+          if(dir==null||file==null) return;
+          try{
+              FileReader fr=new FileReader(dir+file);
+              BufferedReader br=new BufferedReader(fr);
+              while(true){
+                  String data="";
+                  data=br.readLine();
+                  if(data==null)break;
+                  Chat_area.append(data+"\n");
+                  
+              }
+          }catch(Exception e1){  }
+        
+      }
+      else if(e.getSource()==itemSave){
+         System.out.println("저장!!");
+         FileDialog fd=new FileDialog(this, "대화 저장", FileDialog.SAVE);
+          fd.show();
+          String dir=fd.getDirectory();
+          String file=fd.getFile();
+          if(dir==null||file==null) return;
+          File f=new File(dir+file);
+          try{
+             PrintWriter pw=new PrintWriter(f);
+              pw.println(Chat_area.getText());
+              pw.close();
+              System.out.println("대화내용이 저장되었습니다.\n");
+          }catch(Exception e1){  }
+      }
+      
    }
+     
 @Override
 public void keyPressed(KeyEvent e) { // 눌렀을 때
-	// TODO Auto-generated method stub
-	
+   // TODO Auto-generated method stub
+   
 }
 @Override
 public void keyReleased(KeyEvent e) { // 눌렀다땠을 때
-	
-	if(e.getKeyCode()==10)//입력값이 엔터일 때
+   
+   if(e.getKeyCode()==10)//입력값이 엔터일 때
 	{
 		if(message_tf.getText() == null)//메시지 입력안하고 전송하면 멈추는 현상 해결
 		{
-			String msg = message_tf.getText();
-			msg = " ";
-			send_message("Chatting/"+My_Room+"/"+msg);
-			message_tf.setText(" ");
-			message_tf.requestFocus();
-		}
-		else if(!(message_tf.getText() == null))//메시지 입력하고 전송
-		{
-			send_message("Chatting/"+My_Room+"/"+message_tf.getText());
-			message_tf.setText(" "); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
-	   	 	message_tf.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
-		}
-	}
-	// TODO Auto-generated method stub
-	
+         String msg = message_tf.getText();
+         msg = " ";
+         send_message("Chatting/"+My_Room+"/"+msg);
+         message_tf.setText(" ");
+         message_tf.requestFocus();
+      }
+      else if(!(message_tf.getText() == null))//메시지 입력하고 전송
+      {
+         send_message("Chatting/"+My_Room+"/"+message_tf.getText());
+         message_tf.setText(" "); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
+             message_tf.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
+      }
+   }
+   // TODO Auto-generated method stub
+   
 }
 @Override
 public void keyTyped(KeyEvent e) { // 타이핑했을 때
-	// TODO Auto-generated method stub
-	
+   // TODO Auto-generated method stub
+   
 }
 
 }
