@@ -107,11 +107,15 @@ private JMenuBar bar=new JMenuBar();
 private JMenu menu_talk=new JMenu("대화내용");
 private JMenuItem talkOpen=new JMenuItem("불러오기");
 private JMenuItem talkSave=new JMenuItem("저장");
+private JMenuItem picsOpen=new JMenuItem("사진 불러오기");
 private JMenuItem itemExit=new JMenuItem("끝내기");
 
-private JMenu menu_pics=new JMenu("사진파일");
-private JMenuItem picsOpen=new JMenuItem("불러오기");
-private JMenuItem picsSave=new JMenuItem("저장");
+private JMenu menu_pics=new JMenu("배경화면");
+private JMenuItem bg1=new JMenuItem("엑셀");
+private JMenuItem bg2=new JMenuItem("파워포인트");
+private JMenuItem bg3=new JMenuItem("비주얼 스튜디오");
+
+
 //이미지파일
 private StyleContext context = new StyleContext();
 private StyledDocument document = new DefaultStyledDocument(context);
@@ -181,7 +185,12 @@ private JLabel lblNewLabel_1;
       talkSave.addActionListener(this);
       itemExit.addActionListener(this);
       picsOpen.addActionListener(this);
-      picsSave.addActionListener(this);
+      
+      bg1.addActionListener(this);
+      bg2.addActionListener(this);
+      bg3.addActionListener(this);
+    //  picsSave.addActionListener(this);
+      
     //텍스트필드 1개 키 리스너
       message_tf.addKeyListener(this);
    }
@@ -274,14 +283,19 @@ private JLabel lblNewLabel_1;
       exit_btn.setBounds(479, 386, 80, 23);
       contentPane.add(exit_btn);
       exit_btn.setEnabled(false);
+      
+      //메뉴바
       this.setJMenuBar(bar);
       bar.add(menu_talk);
        menu_talk.add(talkOpen);
        menu_talk.add(talkSave);
+       menu_talk.add(picsOpen);
        menu_talk.add(itemExit);
        bar.add(menu_pics);
-       menu_pics.add(picsOpen);
-       menu_pics.add(picsSave);
+       menu_pics.add(bg1);
+       menu_pics.add(bg2);
+       menu_pics.add(bg3);
+      // menu_pics.add(picsSave);
       this.setVisible(false);
    }
    
@@ -698,24 +712,7 @@ private JLabel lblNewLabel_1;
               textPane.setText(textPane.getText()+"대화가 저장되었습니다.\n");
               System.out.println("대화내용이 저장되었습니다.\n");
           }catch(Exception e1){  }
-      } else if(e.getSource()==picsSave){
-          System.out.println("저장!!");
-          FileDialog fd=new FileDialog(this, "사진 저장", FileDialog.SAVE);
-           fd.show();
-           String dir=fd.getDirectory();
-           String file=fd.getFile();
-           if(dir==null||file==null) return;
-           f=new File(dir1+file1);
-           try{
-         	  
-              PrintWriter pw=new PrintWriter(f);
-               //pw.println(Chat_area.getText());
-              pw.println(icon.toString());
-               pw.close();
-               textPane.setText(textPane.getText()+"사진이 저장되었습니다.\n");
-               System.out.println("사진이 저장되었습니다.\n");
-           }catch(Exception e1){  }
-       }
+      } 
       else if(e.getSource()==picsOpen){
           System.out.println("불러오기!!"); 
           FileDialog fd=new FileDialog(this, "대화 불러오기", FileDialog.LOAD);
@@ -737,6 +734,14 @@ private JLabel lblNewLabel_1;
     	      System.err.println("Oops");
     	   }
        }
+      else if(e.getSource()==bg1){
+    	  //엑셀
+      }else if(e.getSource()==bg2){
+    	  //파워포인트
+      }else if(e.getSource()==bg3){
+    	  //비주얼스튜디오
+      }
+	      
    }
      
 @Override
