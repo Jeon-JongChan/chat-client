@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -39,6 +40,7 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -107,8 +109,11 @@ private JMenuBar bar=new JMenuBar();
 private JMenu menu_talk=new JMenu("대화내용");
 private JMenuItem talkOpen=new JMenuItem("불러오기");
 private JMenuItem talkSave=new JMenuItem("저장");
-private JMenuItem picsOpen=new JMenuItem("사진 불러오기");
 private JMenuItem itemExit=new JMenuItem("끝내기");
+
+private JMenu menu_img=new JMenu("사진");
+private JMenuItem picsOpen=new JMenuItem("불러오기");
+private JMenuItem picsSave=new JMenuItem("저장");
 
 private JMenu menu_pics=new JMenu("배경화면");
 private JMenuItem bg1=new JMenuItem("엑셀");
@@ -137,6 +142,8 @@ private JScrollPane scrollPane;
 private File f;
 private String dir1;
 private String file1;
+private BufferedImage img=null;
+
 //리스트 인덱수 수
 private JLabel lbNewlabel;
 private JLabel lblNewLabel_1;
@@ -185,7 +192,7 @@ private JLabel lblNewLabel_1;
       talkSave.addActionListener(this);
       itemExit.addActionListener(this);
       picsOpen.addActionListener(this);
-      
+      picsSave.addActionListener(this);
       bg1.addActionListener(this);
       bg2.addActionListener(this);
       bg3.addActionListener(this);
@@ -289,8 +296,12 @@ private JLabel lblNewLabel_1;
       bar.add(menu_talk);
        menu_talk.add(talkOpen);
        menu_talk.add(talkSave);
-       menu_talk.add(picsOpen);
        menu_talk.add(itemExit);
+       
+       bar.add(menu_img);
+       menu_img.add(picsOpen);
+       menu_img.add(picsSave);
+       
        bar.add(menu_pics);
        menu_pics.add(bg1);
        menu_pics.add(bg2);
@@ -501,7 +512,13 @@ private JLabel lblNewLabel_1;
 	   {
     	  String msg = st.nextToken();//str에서 세번째/ 이후의 문자열
     	  Date date=new Date();
-		   textPane.setText(textPane.getText()+"\n["+date+"] "+Message+" : "+msg+"\n");
+    	  try {
+			document.insertString(document.getLength(), "\n["+date+"] "+Message+" : "+msg+"\n", attributes);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		   //textPane.setText(textPane.getText()+"\n["+date+"] "+Message+" : "+msg+"\n");
 		   System.out.println(textPane.getText());
 		   //Chat_area.append("["+date+"] "+Message+" : "+msg+"\n");
 		   //System.out.println(Chat_area.getText());
@@ -688,7 +705,8 @@ private JLabel lblNewLabel_1;
                   data=br.readLine();
                   if(data==null)break;
                   //Chat_area.append(data+"\n");
-                  textPane.setText("\n"+textPane.getText()+data+"\n");
+                  //textPane.setText("\n"+textPane.getText()+data+"\n");
+                  document.insertString(document.getLength(), data+"\n", labelStyle);
                   scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
            	   
               }
@@ -709,22 +727,48 @@ private JLabel lblNewLabel_1;
               //pw.println(Chat_area.getText());
              pw.println(textPane.getText());
               pw.close();
-              textPane.setText(textPane.getText()+"대화가 저장되었습니다.\n");
+              document.insertString(document.getLength(), "대화가 저장되었습니다.\n", labelStyle);
+             // textPane.setText(textPane.getText()+"대화가 저장되었습니다.\n");
               System.out.println("대화내용이 저장되었습니다.\n");
           }catch(Exception e1){  }
       } 
+      else if(e.getSource()==picsSave){
+          System.out.println("저장!!");
+          FileDialog fd=new FileDialog(this, "대화 저장", FileDialog.SAVE);
+           fd.show();
+           String dir=fd.getDirectory();
+           String file=fd.getFile();
+           if(dir==null||file==null) return;
+           f=new File(dir+file);
+           try{
+         	  
+        	   ImageIO.write(img, "png",f);
+               document.insertString(document.getLength(), "사진이 저장되었습니다.\n", labelStyle);
+              // textPane.setText(textPane.getText()+"대화가 저장되었습니다.\n");
+               System.out.println("사진이 저장되었습니다.\n");
+           }catch(Exception e1){ 
+        	   e1.printStackTrace();
+           }
+       } 
       else if(e.getSource()==picsOpen){
           System.out.println("불러오기!!"); 
           FileDialog fd=new FileDialog(this, "대화 불러오기", FileDialog.LOAD);
            fd.show();
            dir1=fd.getDirectory();
            file1=fd.getFile();
-           
+           f=new File(dir1+file1);
+           try {
+			img=ImageIO.read(f);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
            if(dir1==null||file1==null) return;
         // 메세지 콘텐츠 삽입
     	   try {
     		   Date date=new Date();
-    	        textPane.setText(textPane.getText()+"\n["+date+"]\n");
+    		   document.insertString(document.getLength(), "\n["+date+"]\n", labelStyle);
+    	        //textPane.setText(textPane.getText()+"\n["+date+"]\n");
     	    	icon = new ImageIcon(dir1+file1);
     	        label = new JLabel(icon);
     	        StyleConstants.setComponent(labelStyle, label);
